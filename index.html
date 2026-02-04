@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FPV穿越机运动员心理评估系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+        header h1 {
+            margin: 0 0 10px 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        header p {
+            margin: 5px 0 0 0;
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e5e7eb;
+            overflow-x: auto;
+        }
+        .tab {
+            flex: 0 0 auto;
+            padding: 15px 25px;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            font-size: 15px;
+            font-weight: 500;
+            color: #64748b;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        .tab:hover {
+            background: #e9ecef;
+        }
+        .tab.active {
+            background: white;
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+        .content {
+            padding: 30px 40px;
+        }
+        .assessment-section {
+            display: none;
+        }
+        .assessment-section.active {
+            display: block;
+        }
+        .scale-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        .scale-description {
+            background: #fef3c7;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #f59e0b;
+        }
+        .assessment-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .question-group {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        .question-group h3 {
+            font-size: 16px;
+            color: #1e3a8a;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .question-item {
+            margin-bottom: 12px;
+        }
+        .question-item label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #4b5563;
+            font-size: 14px;
+        }
+        .options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .options label {
+            flex: 0 0 auto;
+            min-width: 80px;
+        }
+        .options input[type="radio"] {
+            margin-right: 6px;
+        }
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            justify-content: center;
+        }
+        .btn {
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #5a6270;
+        }
+        .result-container {
+            display: none;
+            background: white;
+            padding: 30px;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .result-container.active {
+            display: block;
+        }
+        .result-header {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px 10px 0 0;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .result-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        .result-card {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .result-card h4 {
+            font-size: 18px;
+            color: #1e3a8a;
+            margin-bottom: 15px;
+        }
+        .result-score {
+            font-size: 28px;
+            font-weight: 700;
+            color: #667eea;
+            margin: 10px 0;
+        }
+        .result-level {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        .level-excellent {
+            background: #10b981;
+            color: white;
+        }
+        .level-good {
+            background: #f59e0b;
+            color: white;
+        }
+        .level-moderate {
+            background: #f59e0b;
+            color: white;
+        }
+        .level-attention {
+            background: #ef4444;
+            color: white;
+        }
+        .result-description {
+            font-size: 14px;
+            color: #64748b;
+            line-height: 1.6;
+            margin-top: 10px;
+        }
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: white;
+        }
+        .result-table th,
+        .result-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .result-table th {
+            background: #f3f4f6;
+            font-weight: 600;
+            color: #1e3a8a;
+        }
+        .recommendation-section {
+            background: #fef3c7;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border: 2px solid #10b981;
+        }
+        .recommendation-section h4 {
+            color: #059669;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .student-info {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .student-info input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .student-info label {
+            font-weight: 600;
+            color: #1e3a8a;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+        .type-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        .type-a { background: #f59e0b; color: white; }
+        .type-b { background: #667eea; color: white; }
+        .type-c { background: #10b981; color: white; }
+        .type-d { background: #ef4444; color: white; }
+
+        @media (max-width: 768px) {
+            .buttons {
+                flex-direction: column;
+            }
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚁 FPV穿越机运动员心理评估系统</h1>
+            <p>基于运动心理学标准量表的综合性心理状态评估工具</p>
+        </header>
+
+        <div class="student-info">
+            <label>👤 学员姓名：</label>
+            <input type="text" id="studentName" placeholder="请输入学员姓名">
+            <label>📅 评估日期：</label>
+            <input type="date" id="assessmentDate">
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showAssessment('scat')">SCAT - 竞赛焦虑</button>
+            <button class="tab" onclick="showAssessment('csai2')">CSAI-2 - 状态焦虑</button>
+            <button class="tab" onclick="showAssessment('smtq')">SMTQ - 心理坚韧性</button>
+        </div>
+
+        <div class="content">
+            <!-- SCAT Assessment -->
+            <div id="scat" class="assessment-section active">
+                <h2 class="scale-title">运动竞赛焦虑量表（SCAT）</h2>
+                <div class="scale-description">
+                    <p><strong>适用场景：</strong>评估运动员在竞赛情境下的特质焦虑水平</p>
+                    <p><strong>评分说明：</strong>根据最近1个月的感受作答，选项：<strong>几乎没有</strong>=1分，<strong>有时有</strong>=2分，<strong>经常有</strong>=3分</p>
+                </div>
+
+                <form class="assessment-form" id="scatForm">
+                    <div class="question-group">
+                        <h3>第一部分：焦虑表现</h3>
+                        <div class="question-item">
+                            <label>2. 我在赛前会感到不安</label>
+                            <div class="options">
+                                <label><input type="radio" name="scat2" value="1"> 几乎没有</label>
+                                <label><input type="radio" name="scat2" value="2"> 有时有</label>
+                                <label><input type="radio" name="scat2" value="3"> 经常有</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>3. 我在赛前因比赛担心而无法好好参赛</label>
+                            <div class="options">
+                                <label><input type="radio" name="scat3" value="1"> 几乎没有</label>
+                                <label><input type="radio" name="scat3" value="2"> 有时有</label>
+                                <label><input type="radio" name="scat3" value="3"> 经常有</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>5. 我在比赛时会担心失误</label>
+                            <div class="options">
+                                <label><input type="radio" name="scat5" value="1"> 几乎没有</label>
+                                <label><input type="radio" name="scat5" value="2"> 有时有</label>
+                                <label><input type="radio" name="scat5" value="3"> 经常有</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>8. 我在比赛前有反胃的感觉</label>
+                            <div class="options">
+                                <label><input type="radio" name="scat8" value="1"> 几乎没有</label>
+                                <label><input type="radio" name="scat8" value="2"> 有时有</label>
+                                <label><input type="radio" name="scat8" value="3"> 经常有</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>9. 赛前我发现心脏跳得比平时快</label>
+                            <div class="options">
+                                <label><input type="radio" name="scat9" value="1"> 几乎没有</label>
+                                <label><input type="radio" name="scat9" value="2"> 有时有</label>
+                                <label><input type="radio" name="scat9" value="3"> 经常有</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>12. 赛前我会变成神经质</label>
+                            <div class="options">
+                                <label><input type="radio" name="scat12" value="1"> 几乎没有</label>
+                                <label><input type="radio" name="scat12" value="2"> 有时有</label>
+                                <label><input type="radio" name="scat12" value="3"> 经常有</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>14. 我很神经敏锐地等待比赛的开始</label>
+                            <div class="options">
+                                <label><input type="radio" name="scat14" value="1"> 几乎没有</label>
+                                <label><input type="radio" name="scat14" value="2"> 有时有</label>
+                                <label><input type="radio" name="scat14" value="3"> 经常有</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>15. 在比赛前我经常会过度紧张</label>
+                            <div class="options">
+                                <label><input type="radio" name="scat15" value="1"> 几乎没有</label>
+                                <label><input type="radio" name="scat15" value="2"> 有时有</label>
+                                <label><input type="radio" name="scat15" value="3"> 经常有</label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="buttons">
+                    <button class="btn btn-primary" onclick="calculateSCAT()">提交评估</button>
+                    <button class="btn btn-secondary" onclick="resetForm('scatForm')">重置</button>
+                </div>
+            </div>
+
+            <!-- CSAI-2 Assessment -->
+            <div id="csai2" class="assessment-section">
+                <h2 class="scale-title">竞赛状态焦虑问卷（CSAI-2）</h2>
+                <div class="scale-description">
+                    <p><strong>适用场景：</strong>评估赛前或赛后的状态焦虑</p>
+                    <p><strong>评分说明：</strong>请想象正处于重要比赛开始前，选择：<strong>一点都没有</strong>=1分，<strong>有点儿</strong>=2分，<strong>适中</strong>=3分，<strong>非常强烈</strong>=4分</p>
+                </div>
+
+                <form class="assessment-form" id="csai2Form">
+                    <div class="question-group">
+                        <h3>认知焦虑维度</h3>
+                        <div class="question-item">
+                            <label>1. 我对此次比赛感到担心</label>
+                            <div class="options">
+                                <label><input type="radio" name="c1" value="1"> 一点都没有</label>
+                                <label><input type="radio" name="c1" value="2"> 有点儿</label>
+                                <label><input type="radio" name="c1" value="3"> 适中</label>
+                                <label><input type="radio" name="c1" value="4"> 非常强烈</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>2. 我怀疑自己</label>
+                            <div class="options">
+                                <label><input type="radio" name="c2" value="1"> 一点都没有</label>
+                                <label><input type="radio" name="c2" value="2"> 有点儿</label>
+                                <label><input type="radio" name="c2" value="3"> 适中</label>
+                                <label><input type="radio" name="c2" value="4"> 非常强烈</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>3. 我担心这次比赛不能像往常那样比得好</label>
+                            <div class="options">
+                                <label><input type="radio" name="c3" value="1"> 一点都没有</label>
+                                <label><input type="radio" name="c3" value="2"> 有点儿</label>
+                                <label><input type="radio" name="c3" value="3"> 适中</label>
+                                <label><input type="radio" name="c3" value="4"> 非常强烈</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>4. 我担心会在比赛中失败</label>
+                            <div class="options">
+                                <label><input type="radio" name="c4" value="1"> 一点都没有</label>
+                                <label><input type="radio" name="c4" value="2"> 有点儿</label>
+                                <label><input type="radio" name="c4" value="3"> 适中</label>
+                                <label><input type="radio" name="c4" value="4"> 非常强烈</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>5. 我担心在这种压力下不能成功</label>
+                            <div class="options">
+                                <label><input type="radio" name="c5" value="1"> 一点都没有</label>
+                                <label><input type="radio" name="c5" value="2"> 有点儿</label>
+                                <label><input type="radio" name="c5" value="3"> 适中</label>
+                                <label><input type="radio" name="c5" value="4"> 非常强烈</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>6. 我担心在比赛中发挥不好</label>
+                            <div class="options">
+                                <label><input type="radio" name="c6" value="1"> 一点都没有</label>
+                                <label><input type="radio" name="c6" value="2"> 有点儿</label>
+                                <label><input type="radio" name="c6" value="3"> 适中</label>
+                                <label><input type="radio" name="c6" value="4"> 非常强烈</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>7. 我担心不能达到我的目标</label>
+                            <div class="options">
+                                <label><input type="radio" name="c7" value="1"> 一点都没有</label>
+                                <label><input type="radio" name="c7" value="2"> 有点儿</label>
+                                <label><input type="radio" name="c7" value="3"> 适中</label>
+                                <label><input type="radio" name="c7" value="4"> 非常强烈</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>8. 我担心别人会对我的表现感到失望</label>
+                            <div class="options">
+                                <label><input type="radio" name="c8" value="1"> 一点都没有</label>
+                                <label><input type="radio" name="c8" value="2"> 有点儿</label>
+                                <label><input type="radio" name="c8" value="3"> 适中</label>
+                                <label><input type="radio" name="c8" value="4"> 非常强烈</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>9. 我担心不能集中注意力</label>
+                            <div class="options">
+                                <label><input type="radio" name="c9" value="1"> 一点都没有</label>
+                                <label><input type="radio" name="c9" value="2"> 有点儿</label>
+                                <label><input type="radio" name="c9" value="3"> 适中</label>
+                                <label><input type="radio" name="c9" value="4"> 非常强烈</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="question-group">
+                        <h3>躯体焦虑维度</h3>
+                        <div class="question-item">
+                            <label>10. 我感到神经紧张</label>
+                            <div class="options">
+                                <label><input type="radio" name="c10" value="1"> 一点都没有</label>
+                                <label><input type="radio" name="c10" value="2"> 有点儿</label>
+                                <label><input type="radio" name="c10" value="3"> 适中</label>
+                                <label><input type="radio" name="c10" value="4"> 非常强烈</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>11. 我感到心神不安</label>
+                            <div class="options">
+                                <label><input type="radio" name="c11" value="1"> 一点都没有</label>
+                                <label><input type="radio" name="c11" value="2"> 有点儿</label>
+                                <label><input type="radio" name="c11" value="3"> 适中</label>
+                                <label><input type="radio" name="c11" value="4"> 非常强烈</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>12. 我身体感到紧张</label>
+                            <div class="options">
+                                <label><input type="radio" name="c12" value="1"> 一点都没有</label>
+                                <label><input type="radio" name="c12" value="2"> 有点儿</label>
+                                <label><input type="radio" name="c12" value="3"> 适中</label>
+                                <label><input type="radio" name="c12" value="4"> 非常强烈</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>13. 我感到胃部紧张</label>
+                            <div class="options">
+                                <label><input type="radio" name="c13" value="1"> 一点都没有</label>
+                                <label><input type="radio" name="c13" value="2"> 有点儿</label>
+                                <label><input type="radio" name="c13" value="3"> 适中</label>
+                                <label><input type="radio" name="c13" value="4"> 非常强烈</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>14. 我心跳得很厉害</label>
+                            <div class="options">
+                                <label><input type="radio" name="c14" value="1"> 一点都没有</label>
+                                <label><input type="radio" name="c14" value="2"> 有点儿</label>
+                                <label><input type="radio" name="c14" value="3"> 适中</label>
+                                <label><input type="radio" name="c14" value="4"> 非常强烈</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>15. 我感到胃部下沉</label>
+                            <div class="options">
+                                <label><input type="radio" name="c15" value="1"> 一点都没有</label>
+                                <label><input type="radio" name="c15" value="2"> 有点儿</label>
+                                <label><input type="radio" name="c15" value="3"> 适中</label>
+                                <label><input type="radio" name="c15" value="4"> 非常强烈</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>16. 我的手又湿又凉</label>
+                            <div class="options">
+                                <label><input type="radio" name="c16" value="1"> 一点都没有</label>
+                                <label><input type="radio" name="c16" value="2"> 有点儿</label>
+                                <label><input type="radio" name="c16" value="3"> 适中</label>
+                                <label><input type="radio" name="c16" value="4"> 非常强烈</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>17. 我感到身体发僵</label>
+                            <div class="options">
+                                <label><input type="radio" name="c17" value="1"> 一点都没有</label>
+                                <label><input type="radio" name="c17" value="2"> 有点儿</label>
+                                <label><input type="radio" name="c17" value="3"> 适中</label>
+                                <label><input type="radio" name="c17" value="4"> 非常强烈</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>18. 我是镇定的（反向计分）</label>
+                            <div class="options">
+                                <label><input type="radio" name="c18" value="1"> 一点都没有</label>
+                                <label><input type="radio" name="c18" value="2"> 有点儿</label>
+                                <label><input type="radio" name="c18" value="3"> 适中</label>
+                                <label><input type="radio" name="c18" value="4"> 非常强烈</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="question-group">
+                        <h3>状态自信维度</h3>
+                        <div class="question-item">
+                            <label>19. 我感到自己对这场比赛有信心</label>
+                            <div class="options">
+                                <label><input type="radio" name="c19" value="1"> 一点都没有</label>
+                                <label><input type="radio" name="c19" value="2"> 有点儿</label>
+                                <label><input type="radio" name="c19" value="3"> 适中</label>
+                                <label><input type="radio" name="c19" value="4"> 非常强烈</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>20. 我对这场比赛有把握</label>
+                            <div class="options">
+                                <label><input type="radio" name="c20" value="1"> 一点都没有</label>
+                                <label><input type="radio" name="c20" value="2"> 有点儿</label>
+                                <label><input type="radio" name="c20" value="3"> 适中</label>
+                                <label><input type="radio" name="c20" value="4"> 非常强烈</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>21. 我有信心面对这场挑战</label>
+                            <div class="options">
+                                <label><input type="radio" name="c21" value="1"> 一点都没有</label>
+                                <label><input type="radio" name="c21" value="2"> 有点儿</label>
+                                <label><input type="radio" name="c21" value="3"> 适中</label>
+                                <label><input type="radio" name="c21" value="4"> 非常强烈</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>22. 我相信我会有出色的表现</label>
+                            <div class="options">
+                                <label><input type="radio" name="c22" value="1"> 一点都没有</label>
+                                <label><input type="radio" name="c22" value="2"> 有点儿</label>
+                                <label><input type="radio" name="c22" value="3"> 适中</label>
+                                <label><input type="radio" name="c22" value="4"> 非常强烈</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>23. 我感到精神是放松的（反向计分）</label>
+                            <div class="options">
+                                <label><input type="radio" name="c23" value="1"> 一点都没有</label>
+                                <label><input type="radio" name="c23" value="2"> 有点儿</label>
+                                <label><input type="radio" name="c23" value="3"> 适中</label>
+                                <label><input type="radio" name="c23" value="4"> 非常强烈</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>24. 我很有信心，因为在我的内心已达到自己的目标</label>
+                            <div class="options">
+                                <label><input type="radio" name="c24" value="1"> 一点都没有</label>
+                                <label><input type="radio" name="c24" value="2"> 有点儿</label>
+                                <label><input type="radio" name="c24" value="3"> 适中</label>
+                                <label><input type="radio" name="c24" value="4"> 非常强烈</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>25. 我有信心在这种压力下完成比赛任务</label>
+                            <div class="options">
+                                <label><input type="radio" name="c25" value="1"> 一点都没有</label>
+                                <label><input type="radio" name="c25" value="2"> 有点儿</label>
+                                <label><input type="radio" name="c25" value="3"> 适中</label>
+                                <label><input type="radio" name="c25" value="4"> 非常强烈</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>26. 我是自信的（反向计分）</label>
+                            <div class="options">
+                                <label><input type="radio" name="c26" value="1"> 一点都没有</label>
+                                <label><input type="radio" name="c26" value="2"> 有点儿</label>
+                                <label><input type="radio" name="c26" value="3"> 适中</label>
+                                <label><input type="radio" name="c26" value="4"> 非常强烈</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>27. 我有信心在压力下出色表现</label>
+                            <div class="options">
+                                <label><input type="radio" name="c27" value="1"> 一点都没有</label>
+                                <label><input type="radio" name="c27" value="2"> 有点儿</label>
+                                <label><input type="radio" name="c27" value="3"> 适中</label>
+                                <label><input type="radio" name="c27" value="4"> 非常强烈</label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="buttons">
+                    <button class="btn btn-primary" onclick="calculateCSAI2()">提交评估</button>
+                    <button class="btn btn-secondary" onclick="resetForm('csai2Form')">重置</button>
+                </div>
+            </div>
+
+            <!-- SMTQ Assessment -->
+            <div id="smtq" class="assessment-section">
+                <h2 class="scale-title">心理坚韧性问卷（SMTQ）</h2>
+                <div class="scale-description">
+                    <p><strong>适用场景：</strong>评估运动员在压力下的抗压能力</p>
+                    <p><strong>评分说明：</strong>请根据实际情况评分：<strong>完全不符合</strong>=1分，<strong>不符合</strong>=2分，<strong>有点符合</strong>=3分，<strong>基本符合</strong>=4分，<strong>非常符合</strong>=5分</p>
+                </div>
+
+                <form class="assessment-form" id="smtqForm">
+                    <div class="question-group">
+                        <h3>自信维度</h3>
+                        <div class="question-item">
+                            <label>1. 一旦变得不镇定，我能立刻恢复过来</label>
+                            <div class="options">
+                                <label><input type="radio" name="s1" value="1"> 完全不符合</label>
+                                <label><input type="radio" name="s1" value="2"> 不符合</label>
+                                <label><input type="radio" name="s1" value="3"> 有点符合</label>
+                                <label><input type="radio" name="s1" value="4"> 基本符合</label>
+                                <label><input type="radio" name="s1" value="5"> 非常符合</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>2. 我担心自己会表现不佳（反向计分）</label>
+                            <div class="options">
+                                <label><input type="radio" name="s2" value="1"> 完全不符合</label>
+                                <label><input type="radio" name="s2" value="2"> 不符合</label>
+                                <label><input type="radio" name="s2" value="3"> 有点符合</label>
+                                <label><input type="radio" name="s2" value="4"> 基本符合</label>
+                                <label><input type="radio" name="s2" value="5"> 非常符合</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>3. 我对自己的能力坚信不疑</label>
+                            <div class="options">
+                                <label><input type="radio" name="s3" value="1"> 完全不符合</label>
+                                <label><input type="radio" name="s3" value="2"> 不符合</label>
+                                <label><input type="radio" name="s3" value="3"> 有点符合</label>
+                                <label><input type="radio" name="s3" value="4"> 基本符合</label>
+                                <label><input type="radio" name="s3" value="5"> 非常符合</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>4. 我面临压力时也能有出色表现</label>
+                            <div class="options">
+                                <label><input type="radio" name="s4" value="1"> 完全不符合</label>
+                                <label><input type="radio" name="s4" value="2"> 不符合</label>
+                                <label><input type="radio" name="s4" value="3"> 有点符合</label>
+                                <label><input type="radio" name="s4" value="4"> 基本符合</label>
+                                <label><input type="radio" name="s4" value="5"> 非常符合</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="question-group">
+                        <h3>坚定维度</h3>
+                        <div class="question-item">
+                            <label>5. 我致力于完成个人所承担的任务</label>
+                            <div class="options">
+                                <label><input type="radio" name="s5" value="1"> 完全不符合</label>
+                                <label><input type="radio" name="s5" value="2"> 不符合</label>
+                                <label><input type="radio" name="s5" value="3"> 有点符合</label>
+                                <label><input type="radio" name="s5" value="4"> 基本符合</label>
+                                <label><input type="radio" name="s5" value="5"> 非常符合</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>6. 我被自我怀疑困扰着（反向计分）</label>
+                            <div class="options">
+                                <label><input type="radio" name="s6" value="1"> 完全不符合</label>
+                                <label><input type="radio" name="s6" value="2"> 不符合</label>
+                                <label><input type="radio" name="s6" value="3"> 有点符合</label>
+                                <label><input type="radio" name="s6" value="4"> 基本符合</label>
+                                <label><input type="radio" name="s6" value="5"> 非常符合</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>7. 我将潜在的威胁看作有利的机会</label>
+                            <div class="options">
+                                <label><input type="radio" name="s7" value="1"> 完全不符合</label>
+                                <label><input type="radio" name="s7" value="2"> 不符合</label>
+                                <label><input type="radio" name="s7" value="3"> 有点符合</label>
+                                <label><input type="radio" name="s7" value="4"> 基本符合</label>
+                                <label><input type="radio" name="s7" value="5"> 非常符合</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>8. 我会给自己设置具有挑战性的目标</label>
+                            <div class="options">
+                                <label><input type="radio" name="s8" value="1"> 完全不符合</label>
+                                <label><input type="radio" name="s8" value="2"> 不符合</label>
+                                <label><input type="radio" name="s8" value="3"> 有点符合</label>
+                                <label><input type="radio" name="s8" value="4"> 基本符合</label>
+                                <label><input type="radio" name="s8" value="5"> 非常符合</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="question-group">
+                        <h3>控制维度</h3>
+                        <div class="question-item">
+                            <label>9. 当事情未能如我所料时，我会变得生气和沮丧（反向计分）</label>
+                            <div class="options">
+                                <label><input type="radio" name="s9" value="1"> 完全不符合</label>
+                                <label><input type="radio" name="s9" value="2"> 不符合</label>
+                                <label><input type="radio" name="s9" value="3"> 有点符合</label>
+                                <label><input type="radio" name="s9" value="4"> 基本符合</label>
+                                <label><input type="radio" name="s9" value="5"> 非常符合</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>10. 在困境中，我会选择放弃（反向计分）</label>
+                            <div class="options">
+                                <label><input type="radio" name="s10" value="1"> 完全不符合</label>
+                                <label><input type="radio" name="s10" value="2"> 不符合</label>
+                                <label><input type="radio" name="s10" value="3"> 有点符合</label>
+                                <label><input type="radio" name="s10" value="4"> 基本符合</label>
+                                <label><input type="radio" name="s10" value="5"> 非常符合</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>11. 我会因为事情无法预期或控制而变得焦虑不安（反向计分）</label>
+                            <div class="options">
+                                <label><input type="radio" name="s11" value="1"> 完全不符合</label>
+                                <label><input type="radio" name="s11" value="2"> 不符合</label>
+                                <label><input type="radio" name="s11" value="3"> 有点符合</label>
+                                <label><input type="radio" name="s11" value="4"> 基本符合</label>
+                                <label><input type="radio" name="s11" value="5"> 非常符合</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>12. 我容易分心而无法集中精力（反向计分）</label>
+                            <div class="options">
+                                <label><input type="radio" name="s12" value="1"> 完全不符合</label>
+                                <label><input type="radio" name="s12" value="2"> 不符合</label>
+                                <label><input type="radio" name="s12" value="3"> 有点符合</label>
+                                <label><input type="radio" name="s12" value="4"> 基本符合</label>
+                                <label><input type="radio" name="s12" value="5"> 非常符合</label>
+                            </div>
+                        </div>
+                        <div class="question-item">
+                            <label>13. 在压力下，我能满怀信心和承诺地做出决策</label>
+                            <div class="options">
+                                <label><input type="radio" name="s13" value="1"> 完全不符合</label>
+                                <label><input type="radio" name="s13" value="2"> 不符合</label>
+                                <label><input type="radio" name="s13" value="3"> 有点符合</label>
+                                <label><input type="radio" name="s13" value="4"> 基本符合</label>
+                                <label><input type="radio" name="s13" value="5"> 非常符合</label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="buttons">
+                    <button class="btn btn-primary" onclick="calculateSMTQ()">提交评估</button>
+                    <button class="btn btn-secondary" onclick="resetForm('smtqForm')">重置</button>
+                </div>
+            </div>
+
+            <!-- Result Container -->
+            <div id="resultContainer" class="result-container">
+                <div class="result-header">
+                    📊 评估报告 - <span id="resultName"></span>
+                </div>
+                <div class="result-content" id="resultContent">
+                    <!-- Results will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Tab switching functionality
+            function showAssessment(assessmentId) {
+                // Hide all sections
+                document.querySelectorAll('.assessment-section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                // Remove active class from all tabs
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                // Show selected section
+                document.getElementById(assessmentId).classList.add('active');
+                // Add active class to clicked tab
+                event.target.classList.add('active');
+                // Hide result container when switching tabs
+                document.getElementById('resultContainer').classList.remove('active');
+            }
+
+            // Reset form functionality
+            function resetForm(formId) {
+                document.getElementById(formId).reset();
+            }
+
+            // SCAT Calculation
+            function calculateSCAT() {
+                const questions = [2, 3, 5, 8, 9, 12, 14, 15];
+                let totalScore = 0;
+                let answeredCount = 0;
+
+                questions.forEach(q => {
+                    const selected = document.querySelector(`input[name="scat${q}"]:checked`);
+                    if (selected) {
+                        totalScore += parseInt(selected.value);
+                        answeredCount++;
+                    }
+                });
+
+                if (answeredCount < questions.length) {
+                    alert('请完成所有题目后再提交！');
+                    return;
+                }
+
+                const studentName = document.getElementById('studentName').value || '学员';
+                const assessmentDate = document.getElementById('assessmentDate').value || new Date().toLocaleDateString('zh-CN');
+
+                // Determine level
+                let level, levelClass, description;
+                if (totalScore <= 25) {
+                    level = '优秀';
+                    levelClass = 'level-excellent';
+                    description = '竞赛焦虑水平很低，心理状态稳定，适合竞技比赛。';
+                } else if (totalScore <= 35) {
+                    level = '良好';
+                    levelClass = 'level-good';
+                    description = '竞赛焦虑水平适中，有轻微提升空间。';
+                } else if (totalScore <= 45) {
+                    level = '需关注';
+                    levelClass = 'level-moderate';
+                    description = '竞赛焦虑水平偏高，建议进行焦虑管理训练。';
+                } else {
+                    level = '需干预';
+                    levelClass = 'level-attention';
+                    description = '竞赛焦虑水平很高，建议寻求专业心理辅导。';
+                }
+
+                displayResult(`${studentName} - SCAT竞赛焦虑评估`, `
+                    <div class="result-card">
+                        <h4>📈 总分评估</h4>
+                        <div class="result-score">${totalScore}<small> / 45</small></div>
+                        <span class="result-level ${levelClass}">${level}</span>
+                        <p class="result-description">${description}</p>
+                    </div>
+                    <div class="result-card">
+                        <h4>🎯 训练建议</h4>
+                        ${totalScore <= 35 ? `
+                        <p><strong>日常训练：</strong></p>
+                        <ul>
+                            <li>每日进行10分钟正念呼吸训练（4-7-8呼吸法）</li>
+                            <li>练习渐进式肌肉放松，从脚趾到面部逐部位紧张-放松</li>
+                            <li>每周2-3次压力情境模拟训练（噪音、观众干扰等）</li>
+                        </ul>
+                        <p><strong>赛前准备：</strong></p>
+                        <ul>
+                            <li>建立赛前仪式化流程（检查设备→呼吸→可视化→心理锚点）</li>
+                            <li>练习控制圈技术：区分可控制与不可控制因素</li>
+                            <li>赛前1小时执行轻度唤醒（如快走10秒）</li>
+                        </ul>
+                        ` : `
+                        <p><strong>优先干预措施：</strong></p>
+                        <ul>
+                            <li>启动每周心理技能训练，每次30分钟</li>
+                            <li>建立"24小时情绪法则"，允许情绪后强制翻页</li>
+                            <li>与教练沟通，采用过程导向反馈模式</li>
+                            <li>考虑寻求运动心理师专业辅导</li>
+                        </ul>
+                        `}
+                    </div>
+                `);
+
+                // Scroll to results
+                document.getElementById('resultContainer').classList.add('active');
+                document.getElementById('resultContainer').scrollIntoView({ behavior: 'smooth' });
+            }
+
+            // CSAI-2 Calculation
+            function calculateCSAI2() {
+                const cognitiveQuestions = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+                const somaticQuestions = [10, 11, 12, 13, 14, 15, 16, 17];
+                const confidenceQuestions = [18, 19, 20, 21, 22, 23, 24, 25, 26, 27];
+
+                let cognitiveScore = 0;
+                let somaticScore = 0;
+                let confidenceScore = 0;
+                let answeredCount = 0;
+
+                cognitiveQuestions.forEach(q => {
+                    const selected = document.querySelector(`input[name="c${q}"]:checked`);
+                    if (selected) {
+                        cognitiveScore += parseInt(selected.value);
+                        answeredCount++;
+                    }
+                });
+
+                somaticQuestions.forEach(q => {
+                    const selected = document.querySelector(`input[name="c${q}"]:checked`);
+                    if (selected) {
+                        somaticScore += parseInt(selected.value);
+                        answeredCount++;
+                    }
+                });
+
+                confidenceQuestions.forEach(q => {
+                    const selected = document.querySelector(`input[name="c${q}"]:checked`);
+                    if (selected) {
+                        confidenceScore += parseInt(selected.value);
+                        answeredCount++;
+                    }
+                });
+
+                // Reverse score for confidence questions
+                const reversedConfidence = 108 - confidenceScore;
+
+                if (answeredCount < 27) {
+                    alert('请完成所有题目后再提交！');
+                    return;
+                }
+
+                const studentName = document.getElementById('studentName').value || '学员';
+                const assessmentDate = document.getElementById('assessmentDate').value || new Date().toLocaleDateString('zh-CN');
+
+                // Determine levels
+                const getLevel = (score, maxScore, thresholds) => {
+                    if (score <= thresholds[0]) return { level: '优秀', class: 'level-excellent', desc: '该维度状态极佳，能够有效管理压力。' };
+                    if (score <= thresholds[1]) return { level: '良好', class: 'level-good', desc: '该维度状态良好，有提升空间。' };
+                    if (score <= thresholds[2]) return { level: '需关注', class: 'level-moderate', desc: '该维度需要针对性训练。' };
+                    return { level: '需干预', class: 'level-attention', desc: '该维度需要专业心理辅导。' };
+                };
+
+                const cognitiveLevel = getLevel(cognitiveScore, 36, [20, 25, 30]);
+                const somaticLevel = getLevel(somaticScore, 36, [15, 20, 25]);
+                const confidenceLevel = getLevel(reversedConfidence, 108, [90, 80, 70]);
+
+                // Determine overall type
+                let typeBadge, typeName, trainingFocus;
+                if (cognitiveScore > 25 && somaticScore < 25 && reversedConfidence >= 70) {
+                    typeBadge = 'type-a';
+                    typeName = '高压型飞手';
+                    trainingFocus = `
+                        <p><strong>核心训练重点：</strong>焦虑管理、放松技术、压力脱敏</p>
+                        <table class="result-table">
+                            <tr><th>训练模块</th><th>频次</th><th>每次时长</th></tr>
+                            <tr><td>正念呼吸</td><td>每日2次</td><td>5-10分钟</td></tr>
+                            <tr><td>渐进式肌肉放松</td><td>每日1次</td><td>10-15分钟</td></tr>
+                            <tr><td>压力情境模拟</td><td>每周3次</td><td>20-30分钟</td></tr>
+                            <tr><td>4-7-8呼吸法</td><td>赛前30分钟</td><td>10次循环</td></tr>
+                        </table>
+                        <p><strong>周目标：</strong>焦虑水平降低5-10%</p>
+                    `;
+                } else if (reversedConfidence < 70 && cognitiveScore < 20 && somaticScore < 20) {
+                    typeBadge = 'type-b';
+                    typeName = '自疑型飞手';
+                    trainingFocus = `
+                        <p><strong>核心训练重点：</strong>成功经验积累、自我对话优化、目标拆解</p>
+                        <table class="result-table">
+                            <tr><th>训练模块</th><th>频次</th><th>每次时长</th></tr>
+                            <tr><td>成就日记</td><td>每日1次</td><td>10-15分钟</td></tr>
+                            <tr><td>小目标训练</td><td>每周3次</td><td>15-20分钟</td></tr>
+                            <tr><td>积极自我对话练习</td><td>每日2次</td><td>5-10分钟</td></tr>
+                            <tr><td>成功画面可视化</td><td>每日1次</td><td>5-10分钟</td></tr>
+                        </table>
+                        <p><strong>周目标：</strong>自信分提升3-5分</p>
+                    `;
+                } else if (cognitiveScore < 20 && somaticScore < 20 && reversedConfidence >= 80) {
+                    typeBadge = 'type-c';
+                    typeName = '抗挫弱型飞手';
+                    trainingFocus = `
+                        <p><strong>核心训练重点：</strong>挫折脱敏、快速复位、归因训练</p>
+                        <table class="result-table">
+                            <tr><th>训练模块</th><th>频次</th><th>每次时长</th></tr>
+                            <tr><td>Deliberate Failure练习</td><td>每周1次</td><td>20-30分钟</td></tr>
+                            <tr><td>快速复位练习</td><td>每日2次</td><td>5-10分钟</td></tr>
+                            <tr><td>失败归因训练</td><td>每次炸机后</td><td>10-15分钟</td></tr>
+                            <tr><td>24小时法则执行</td><td>持续跟踪</td><td>-</td></tr>
+                        </table>
+                        <p><strong>周目标：</strong>炸机后复位时间<2分钟</p>
+                    `;
+                } else {
+                    typeBadge = 'type-d';
+                    typeName = '全能型飞手';
+                    trainingFocus = `
+                        <p><strong>核心训练重点：</strong>精细化、压力情境模拟、极限探索</p>
+                        <table class="result-table">
+                            <tr><th>训练模块</th><th>频次</th><th>每次时长</th></tr>
+                            <tr><td>技术细节打磨</td><td>每日2次</td><td>30-45分钟</td></tr>
+                            <tr><td>压力模拟训练</td><td>每周2次</td><td>30-40分钟</td></tr>
+                            <tr><td>极限探索训练</td><td>每周1次</td><td>20-30分钟</td></tr>
+                            <tr><td>复盘分析</td><td>每次飞行后</td><td>15-20分钟</td></tr>
+                        </table>
+                        <p><strong>周目标：</strong>圈速提升0.5-1秒</p>
+                    `;
+                }
+
+                displayResult(`${studentName} - CSAI-2状态焦虑评估`, `
+                    <div class="result-card">
+                        <h4>🧠 认知焦虑 <span class="type-badge ${typeBadge}">A</span></h4>
+                        <div class="result-score">${cognitiveScore}<small> / 36</small></div>
+                        <span class="result-level ${cognitiveLevel.class}">${cognitiveLevel.level}</span>
+                        <p class="result-description">${cognitiveLevel.desc}</p>
+                    </div>
+                    <div class="result-card">
+                        <h4>💪 躯体焦虑 <span class="type-badge ${typeBadge}">B</span></h4>
+                        <div class="result-score">${somaticScore}<small> / 36</small></div>
+                        <span class="result-level ${somaticLevel.class}">${somaticLevel.level}</span>
+                        <p class="result-description">${somaticLevel.desc}</p>
+                    </div>
+                    <div class="result-card">
+                        <h4>💪 状态自信 <span class="type-badge ${typeBadge}">C</span></h4>
+                        <div class="result-score">${reversedConfidence}<small> / 108</small></div>
+                        <span class="result-level ${confidenceLevel.class}">${confidenceLevel.level}</span>
+                        <p class="result-description">${confidenceLevel.desc}</p>
+                    </div>
+                    <div class="result-card" style="grid-column: 1 / -1;">
+                        <h4>🎯 飞手类型诊断</h4>
+                        <div style="font-size: 20px; font-weight: 600; color: #667eea; margin: 10px 0;">${typeName}</div>
+                        <span class="result-level ${typeBadge}" style="font-size: 16px;">${typeBadge.toUpperCase()}</span>
+                        <p class="result-description" style="margin-top: 10px;">${trainingFocus}</p>
+                    </div>
+                    <div class="recommendation-section">
+                        <h4>📋 个性化训练计划建议</h4>
+                        <p>根据您的评估结果，建议按照以下训练框架进行为期4周的核心技能训练：</p>
+                        <ul>
+                            <li><strong>第1-2周：</strong>基础技能训练与心理基线建立</li>
+                            <li><strong>第3-6周：</strong>核心技能训练与情境模拟</li>
+                            <li><strong>第7-12周：</strong>压力情境模拟与整合</li>
+                            <li><strong>第13周及以后：</strong>常态化与持续优化</li>
+                        </ul>
+                        <p><strong>关键提醒：</strong></p>
+                        <ul>
+                            <li>每月重新评估一次，动态调整训练计划</li>
+                            <li>心理训练与技术训练相结合，每日训练时间建议分配：技术70% + 心理30%</li>
+                            <li>建立训练日志，记录心理状态变化</li>
+                            <li>与教练保持沟通，及时调整训练重点</li>
+                        </ul>
+                    </div>
+                `);
+
+                document.getElementById('resultContainer').classList.add('active');
+                document.getElementById('resultContainer').scrollIntoView({ behavior: 'smooth' });
+            }
+
+            // SMTQ Calculation
+            function calculateSMTQ() {
+                const confidenceQuestions = [1, 3, 4];
+                const commitmentQuestions = [5, 7, 8];
+                const controlQuestions = [9, 10, 11, 12, 13];
+
+                let confidenceScore = 0;
+                let commitmentScore = 0;
+                let controlScore = 0;
+                let answeredCount = 0;
+
+                // Confidence questions (2 and 4 are reverse coded)
+                confidenceQuestions.forEach(q => {
+                    const selected = document.querySelector(`input[name="s${q}"]:checked`);
+                    if (selected) {
+                        if (q === 2 || q === 4) {
+                            confidenceScore += (6 - parseInt(selected.value));
+                        } else {
+                            confidenceScore += parseInt(selected.value);
+                        }
+                        answeredCount++;
+                    }
+                });
+
+                commitmentQuestions.forEach(q => {
+                    const selected = document.querySelector(`input[name="s${q}"]:checked`);
+                    if (selected) {
+                        commitmentScore += parseInt(selected.value);
+                        answeredCount++;
+                    }
+                });
+
+                controlQuestions.forEach(q => {
+                    const selected = document.querySelector(`input[name="s${q}"]:checked`);
+                    if (selected) {
+                        if (q === 9 || q === 10 || q === 11 || q === 12) {
+                            controlScore += (6 - parseInt(selected.value));
+                        } else {
+                            controlScore += parseInt(selected.value);
+                        }
+                        answeredCount++;
+                    }
+                });
+
+                if (answeredCount < 13) {
+                    alert('请完成所有题目后再提交！');
+                    return;
+                }
+
+                const totalScore = confidenceScore + commitmentScore + controlScore;
+                const maxScore = 65;
+
+                const studentName = document.getElementById('studentName').value || '学员';
+                const assessmentDate = document.getElementById('assessmentDate').value || new Date().toLocaleDateString('zh-CN');
+
+                // Determine levels
+                const getLevel = (score, maxScore) => {
+                    const percentage = (score / maxScore) * 100;
+                    if (percentage >= 80) return { level: '优秀', class: 'level-excellent', desc: '心理坚韧性极强，具备冠军心理素质。' };
+                    if (percentage >= 65) return { level: '良好', class: 'level-good', desc: '心理坚韧性较强，持续表现稳定。' };
+                    if (percentage >= 50) return { level: '中等', class: 'level-moderate', desc: '心理坚韧性中等，有提升空间。' };
+                    return { level: '薄弱', class: 'level-attention', desc: '心理坚韧性较弱，需要系统训练。' };
+                };
+
+                const confidenceLevel = getLevel(confidenceScore, 20);
+                const commitmentLevel = getLevel(commitmentScore, 20);
+                const controlLevel = getLevel(controlScore, 25);
+
+                const overallLevel = getLevel(totalScore, 65);
+
+                displayResult(`${studentName} - SMTQ心理坚韧性评估`, `
+                    <div class="result-card">
+                        <h4>🔥 自信维度</h4>
+                        <div class="result-score">${confidenceScore}<small> / 20</small></div>
+                        <span class="result-level ${confidenceLevel.class}">${confidenceLevel.level}</span>
+                        <p class="result-description">${confidenceLevel.desc}</p>
+                    </div>
+                    <div class="result-card">
+                        <h4>💪 坚定维度</h4>
+                        <div class="result-score">${commitmentScore}<small> / 20</small></div>
+                        <span class="result-level ${commitmentLevel.class}">${commitmentLevel.level}</span>
+                        <p class="result-description">${commitmentLevel.desc}</p>
+                    </div>
+                    <div class="result-card">
+                        <h4>🎯 控制维度</h4>
+                        <div class="result-score">${controlScore}<small> / 25</small></div>
+                        <span class="result-level ${controlLevel.class}">${controlLevel.level}</span>
+                        <p class="result-description">${controlLevel.desc}</p>
+                    </div>
+                    <div class="result-card" style="grid-column: 1 / -1;">
+                        <h4>📊 综合评估</h4>
+                        <div class="result-score">${totalScore}<small> / 65</small></div>
+                        <span class="result-level ${overallLevel.class}">${overallLevel.level}</span>
+                        <p class="result-description">${overallLevel.desc}</p>
+                    </div>
+                    <div class="recommendation-section">
+                        <h4>🎯 针对性训练建议</h4>
+                        ${totalScore >= 52 ? `
+                        <p><strong>核心训练重点：</strong>精细化、压力情境模拟、极限探索</p>
+                        <table class="result-table">
+                            <tr><th>训练模块</th><th>频次</th><th>每次时长</th></tr>
+                            <tr><td>技术细节打磨</td><td>每日2次</td><td>30-45分钟</td></tr>
+                            <tr><td>压力模拟训练</td><td>每周2次</td><td>30-40分钟</td></tr>
+                            <tr><td>极限探索训练</td><td>每周1次</td><td>20-30分钟</td></tr>
+                            <tr><td>复盘分析</td><td>每次飞行后</td><td>15-20分钟</td></tr>
+                        </table>
+                        <p><strong>周目标：</strong>圈速提升0.5-1秒</p>
+                        ` : `
+                        <p><strong>核心训练重点：</strong>根据薄弱维度制定提升计划</p>
+                        <table class="result-table">
+                            <tr><th>维度</th><th>当前水平</th><th>训练目标</th></tr>
+                            <tr><td>自信</td><td>${confidenceLevel.level}</td><td>提升至"良好"</td></tr>
+                            <tr><td>坚定</td><td>${commitmentLevel.level}</td><td>提升至"良好"</td></tr>
+                            <tr><td>控制</td><td>${controlLevel.level}</td><td>提升至"良好"</td></tr>
+                        </table>
+                        <p><strong>核心训练模块：</strong></p>
+                        <ul>
+                            <li><strong>成功经验积累：</strong>每日记录3个小进步，强化自我效能感</li>
+                            <li><strong>压力情境脱敏：</strong>每周1次deliberate failure练习，适应失败</li>
+                            <li><strong>快速复位训练：</strong>炸机后30秒内完成3次深呼吸+状态重置</li>
+                            <li><strong>目标拆解练习：</strong>将大目标分解为周目标、日目标，降低焦虑感</li>
+                        </ul>
+                        `}
+                    </div>
+                `);
+
+                document.getElementById('resultContainer').classList.add('active');
+                document.getElementById('resultContainer').scrollIntoView({ behavior: 'smooth' });
+            }
+
+            // Display result function
+            function displayResult(title, content) {
+                document.getElementById('resultName').textContent = title;
+                document.getElementById('resultContent').innerHTML = content;
+            }
+
+            // Initialize date with today's date
+            document.getElementById('assessmentDate').value = new Date().toISOString().split('T')[0];
+        </script>
+    </div>
+</body>
+</html>
